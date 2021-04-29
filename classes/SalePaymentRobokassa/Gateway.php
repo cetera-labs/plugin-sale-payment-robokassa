@@ -31,14 +31,14 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
                     "xtype" => 'textfield',
                     "labelWidth" => 200,
                     "width" => 400,
-                    "fieldLabel" => $t->_('Пароль магазина'),
+                    "fieldLabel" => $t->_('Пароль #1'),
                     "name" => 'shop_password1',
                 ],
                 [
                     "xtype" => 'textfield',
                     "labelWidth" => 200,
                     "width" => 400,
-                    "fieldLabel" => $t->_('Пароль магазина #2'),
+                    "fieldLabel" => $t->_('Пароль #2'),
                     "name" => 'shop_password2',
                 ],
                 [
@@ -52,14 +52,14 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
                     "xtype" => 'textfield',
                     "labelWidth" => 200,
                     "width" => 400,
-                    "fieldLabel" => $t->_('Тестовый пароль магазина'),
+                    "fieldLabel" => $t->_('Тестовый пароль #1'),
                     "name" => 'test_shop_password1',
                 ],
                 [
                     "xtype" => 'textfield',
                     "labelWidth" => 200,
                     "width" => 400,
-                    "fieldLabel" => $t->_('Тестовый пароль магазина #2'),
+                    "fieldLabel" => $t->_('Тестовый пароль #2'),
                     "name" => 'test_shop_password2',
                 ],
 				[
