@@ -149,7 +149,7 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
         $url = self::URL . "?MerchantLogin=" . $shopLogin . "&OutSum=" . $orderSumm . "&InvId=" . $orderId;
         
         if ($this->params['reciept']) {
-            $reciept = urlencode(json_encode($this->getReceipt()));
+            $receipt = urlencode(json_encode($this->getReceipt()));
             $crcStr .= ':' . $receipt;
             $url .= '&Receipt=' . $receipt;
         }
@@ -158,10 +158,6 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
         $url .= '&SignatureValue=' . $crc;
         
         header('Location: '.$url);
-        
-        print_r($this->getReceipt());
-        print json_encode($this->getReceipt());
-        
         die();
 
     }
