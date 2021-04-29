@@ -152,15 +152,15 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
         if ($this->params['reciept']) {
             $receipt = urlencode(json_encode($this->getReceipt()));
             $crcStr .= ':' . $receipt;
-            $url .= '&Receipt=' . $receipt;
+            $url .= '&Receipt=' . urlencode($receipt);
         }
 
         $url .= '&SignatureValue=' . md5($crcStr. ":" . $password);
         
-        //header('Location: '.$url);
-        print $url;
-        print "\n\n";
-        print $crcStr. ":" . $password;
+        header('Location: '.$url);
+        //print $url;
+        //print "\n\n";
+        //print $crcStr. ":" . $password;
         die();
 
     }
