@@ -24,7 +24,7 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
                     "xtype" => 'textfield',
                     "labelWidth" => 200,
                     "width" => 400,
-                    "fieldLabel" => $t->_('Логин магазина'),
+                    "fieldLabel" => $t->_('Идентификатор магазина'),
                     "name" => 'shop_login',
                 ],
                 [
