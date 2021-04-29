@@ -157,8 +157,11 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
 
         $url .= '&SignatureValue=' . md5($crcStr. ":" . $password);
         
-        header('Location: '.$url);
-        die($crcStr. ":" . $password);
+        //header('Location: '.$url);
+        print $url;
+        print "\n\n";
+        print $crcStr. ":" . $password;
+        die();
 
     }
     
