@@ -126,7 +126,12 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
                         ["vat20", 'НДС чека по ставке 20%'],
                         ["vat120", 'НДС чека по расчётной ставке 20/120'],
                     ],
-                ],                
+                ], 
+                [
+					'xtype'      => 'displayfield',
+					'fieldLabel' => 'URL-адрес для callback уведомлений',
+					'value'      => '//'.$_SERVER['HTTP_HOST'].'/cms/plugins/sale-payment-robokassa/callback.php'
+				],                
             )
         );
     }
