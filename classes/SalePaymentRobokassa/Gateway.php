@@ -158,6 +158,10 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
         $url .= '&SignatureValue=' . $crc;
         
         header('Location: '.$url);
+        
+        print_r($this->getReceipt());
+        print json_encode($this->getReceipt());
+        
         die();
 
     }
