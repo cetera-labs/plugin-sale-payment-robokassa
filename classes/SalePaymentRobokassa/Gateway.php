@@ -8,6 +8,8 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
     public $currency = "";
     public $culture = "ru";
     public $encoding = "utf-8";
+    
+    const URL = 'https://auth.robokassa.ru/Merchant/Index.aspx';
 
     public static function getInfo()
     {
@@ -19,14 +21,6 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
             'description' => '',
             'icon' => '/cms/plugins/sale-payment-robokassa/images/icon.gif',
             'params' => array(
-                [
-                    "xtype" => 'textfield',
-                    "labelWidth" => 200,
-                    "width" => 600,
-                    "fieldLabel" => $t->_('Адрес запроса робокассы'),
-                    "value" => "https://auth.robokassa.ru/Merchant/Index.aspx",
-                    "name" => 'url',
-                ],
                 [
                     "xtype" => 'textfield',
                     "labelWidth" => 200,
@@ -70,7 +64,7 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
                     "name" => 'test_shop_password2',
                 ],
 				[
-					'name'       => 'orderBundle',
+					'name'       => 'reciept',
 					'xtype'      => 'checkbox',
 					'fieldLabel' => 'Передача корзины товаров (кассовый чек 54-ФЗ)',
 				],
@@ -143,41 +137,25 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
         $password = !$test ? $this->params["shop_password1"] : $this->params["test_shop_password1"];
         $personalEmail = $this->order->getEmail();
         $orderId = $this->order->getId();
-        $orderSumm = $this->order->getProductsCost();
+        $orderSumm = $this->order->getTotal();
         $url = $this->params["url"];
         $shopLogin = $this->params["shop_login"];
 
-        $crc = md5(
-            $shopLogin . ":" .
-            $orderSumm . ":" .
-            $orderId . ":" .
-            $password
-        );
+        $crcStr = $shopLogin . ":" . $orderSumm . ":" .$orderId;
+        $url = self::URL . "?MerchantLogin=" . $shopLogin . "&OutSum=" . $orderSumm . "&InvId=" . $orderId;
+        
+        if ($this->params['reciept']) {
+            $reciept = urlencode(json_encode($this->getReceipt()));
+            $crcStr .= ':' . $receipt;
+            $url .= '&Receipt=' . $receipt;
+        }
 
-        ob_start();
-        ?>
-        <form action="<?= $url ?>" method="post" name="pay">
-            <input type="hidden" name="MrchLogin" value="<?= $shopLogin ?>">
-            <input type="hidden" name="OutSum" value="<?= $orderSumm ?>">
-            <input type="hidden" name="InvId" value="<?= $orderId ?>">
-            <input type="hidden" name="Desc" value="Заказ №<?= $orderId ?>">
-            <input type="hidden" name="SignatureValue" value="<?= $crc ?>">
-            <input type="hidden" name="IncCurrLabel" value="<?= $this->currency ?>">
-            <input type="hidden" name="Culture" value="<?= $this->culture ?>">
-            <input type="hidden" name="Email" value="<?= $personalEmail ?>">
-            <? if ($test): ?>
-                <input type="hidden" name="IsTest" value="1">
-            <? endif; ?>
-        </form>
-        <script>pay.submit();</script>
-        <?
-        var_dump($shopLogin . ":" .
-            $orderSumm . ":" .
-            $orderId . ":" .
-            $password);
-        $form = ob_get_contents();
-        ob_end_clean();
-        print $form;
+        $crc = md5($crcStr. ":" . $password);
+        $url .= '&SignatureValue=' . $crc;
+        
+        header($url);
+        die();
+
     }
     
     public function getReceipt() {
