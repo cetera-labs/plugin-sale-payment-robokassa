@@ -14,7 +14,6 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
     public static function getInfo()
     {
         $t = \Cetera\Application::getInstance()->getTranslator();
-        $locale = $t->getAdapter()->getLocale();
 
         return array(
             'name' => 'Robokassa',
