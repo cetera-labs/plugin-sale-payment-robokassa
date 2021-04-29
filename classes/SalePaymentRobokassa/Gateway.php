@@ -139,14 +139,15 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
     {
         $test = $this->params["test_mode"];
         $password = !$test ? $this->params["shop_password1"] : $this->params["test_shop_password1"];
-        $personalEmail = $this->order->getEmail();
         $orderId = $this->order->getId();
         $orderSumm = $this->order->getTotal();
-        $url = $this->params["url"];
         $shopLogin = $this->params["shop_login"];
 
         $crcStr = $shopLogin . ":" . $orderSumm . ":" .$orderId;
         $url = self::URL . "?MerchantLogin=" . $shopLogin . "&OutSum=" . $orderSumm . "&InvId=" . $orderId;
+        if ($test) {
+            $url .= '&IsTest=1';
+        }
         
         if ($this->params['reciept']) {
             $receipt = urlencode(json_encode($this->getReceipt()));
@@ -154,11 +155,10 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
             $url .= '&Receipt=' . $receipt;
         }
 
-        $crc = md5($crcStr. ":" . $password);
-        $url .= '&SignatureValue=' . $crc;
+        $url .= '&SignatureValue=' . md5($crcStr. ":" . $password);
         
         header('Location: '.$url);
-        die();
+        die($crcStr. ":" . $password);
 
     }
     
