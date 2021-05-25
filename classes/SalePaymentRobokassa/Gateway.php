@@ -243,12 +243,8 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
             ]
         ];
         
-        $test = $this->params["test_mode"];
-        $password = !$test ? $this->params["shop_password1"] : $this->params["test_shop_password1"];
         $base64 = $this->base64url_encode(json_encode($data));
-        
-        $signature = $this->base64url_encode(md5($base64.$password));
-        
+        $signature = $this->base64url_encode(md5($base64.$this->params["shop_password1"]));
         $body = $base64.'.'.$signature;
         
         $client = new \GuzzleHttp\Client();
@@ -262,6 +258,10 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
             $response = $e->getResponse();
         }
         $res = json_decode($response->getBody(), true);
+        
+        if ($res['ResultCode'] > 0) {
+            throw new \Exception($res['ResultCode'].' '.$res['ResultDescription']);
+        }        
         
         return $res;
         
