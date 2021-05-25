@@ -10,6 +10,7 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
     public $encoding = "utf-8";
     
     const URL = 'https://auth.robokassa.ru/Merchant/Index.aspx';
+    const URL_FISCAL = 'https://ws.roboxchange.com/RoboFiscal/Receipt/Attach';
 
     public static function getInfo()
     {
@@ -186,5 +187,87 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract
             ];
         }
         return $items;
+    }
+
+    public function sendSecondReceipt($products = false) {
+        
+        if (!$products) {
+            $items = $this->getItems();
+        }
+        else {
+            $items = [];
+            foreach($products as $p) {
+                $items[] = [
+                    'name' => $p['name'],
+                    'quantity' => floatval($p['quantity']),
+                    'sum' => $p['price']*$p['quantity'],
+                    'payment_method' => $this->params['payment_method'],
+                    'payment_object' => $this->params['payment_object'],
+                    'tax' => $this->params['vat'],
+                ];
+            }
+        }
+        
+        $total = 0;
+        foreach ($items as $i) {
+            $total += $i['sum'];
+        }
+        
+        $vat = (int)$this->params['vat'];
+        if ($vat > 100) $vat = $vat - 100;
+        
+        $data = [
+            "merchantId" => $this->params["shop_login"],
+            "id" => time(),
+            "originId" => $this->order->getId(),
+            "operation" => "sell",
+            "sno" => $this->params['sno'],
+            "url" => '//'.$_SERVER['HTTP_HOST'],
+            "total" => $total,
+            "items" => $items,
+            "client" => [
+                "email" => $this->order->getEmail(),
+                "phone" => $this->order->getPhone()
+            ],
+            "payments" => [
+                [
+                  "type" => 2,
+                  "sum" => $total,
+                ]
+            ],
+            "vats" => [
+                [
+                  "type" => $this->params['vat'],
+                  "sum" => sprintf("%01.2f", $total * $vat / 100),
+                ]
+            ]
+        ];
+        
+        $test = $this->params["test_mode"];
+        $password = !$test ? $this->params["shop_password1"] : $this->params["test_shop_password1"];
+        $base64 = $this->base64url_encode(json_encode($data));
+        
+        $signature = $this->base64url_encode(md5($base64.$password));
+        
+        $body = $base64.'.'.$signature;
+        
+        $client = new \GuzzleHttp\Client();
+        try {
+            $response = $client->request('POST', self::URL_FISCAL, [
+                'verify' => false,
+                'body' => $body,
+            ]); 
+        } 
+        catch (\GuzzleHttp\Exception\ClientException $e) {
+            $response = $e->getResponse();
+        }
+        $res = json_decode($response->getBody(), true);
+        
+        return $res;
+        
+    }
+    
+    protected function base64url_encode($data) {
+      return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }     
 }
